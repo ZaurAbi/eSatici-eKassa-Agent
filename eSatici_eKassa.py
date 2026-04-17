@@ -13,7 +13,7 @@ from PIL import Image
 
 # ------------- Config -------------
 SERVER_URL = "wss://esatici.az/ws/v1/terminal"
-CONFIG_FILE = "esatici_config.json"
+CONFIG_FILE = os.path.expanduser("~/.esatici_config.json")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
