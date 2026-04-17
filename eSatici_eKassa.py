@@ -133,7 +133,7 @@ class ESaticiApp(ctk.CTk):
         self.worker_thread = None
 
     def update_status(self, text, color):
-        self.lbl_status.configure(text=text, text_color=color)
+        self.after(0, lambda: self.lbl_status.configure(text=text, text_color=color))
 
     def toggle_connection(self):
         if state.should_run:
