@@ -126,7 +126,7 @@ async def websocket_loop(gui_queue):
                                 response = requests.get(target_url, headers=headers, timeout=15)
                             else:
                                 headers["Content-Type"] = "application/json"
-                                response = requests.post(target_url, headers=headers, json=payload, timeout=25)
+                                response = requests.post(target_url, headers=headers, json=payload, timeout=40)
                             result = response.json()
                             log.info(f"Terminal response code: {result.get('code', '?')}")
                         except Exception as e:
