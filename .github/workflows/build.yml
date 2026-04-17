@@ -36,11 +36,11 @@ jobs:
 
     - name: Zip Windows Artifact
       if: runner.os == 'Windows'
-      run: Compress-Archive -Path dist/eSatici_eKassa/* -DestinationPath eSatici_eKassa_Windows.zip
+      run: 7z a -pesatici2026 eSatici_eKassa_Windows.zip ./dist/eSatici_eKassa/*
 
     - name: Zip macOS Artifact
       if: runner.os == 'macOS'
-      run: cd dist && zip -r ../eSatici_eKassa_macOS.zip eSatici_eKassa.app
+      run: cd dist && zip -P esatici2026 -r ../eSatici_eKassa_macOS.zip eSatici_eKassa.app
 
     - name: Publish Release
       uses: softprops/action-gh-release@v1
