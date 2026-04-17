@@ -32,16 +32,24 @@ jobs:
       run: |
         pyinstaller --noconfirm --onedir --windowed --name "eSatici_eKassa" "eSatici_eKassa.py"
 
-    - name: Upload Artifact Windows
+    - name: Zip Windows Artifact
       if: runner.os == 'Windows'
-      uses: actions/upload-artifact@v4
-      with:
-        name: eSatici_eKassa_Windows
-        path: dist/eSatici_eKassa
+      run: Compress-Archive -Path dist/eSatici_eKassa/* -DestinationPath eSatici_eKassa_Windows.zip
 
-    - name: Upload Artifact macOS
+    - name: Zip macOS Artifact
       if: runner.os == 'macOS'
-      uses: actions/upload-artifact@v4
+      run: cd dist && zip -r ../eSatici_eKassa_macOS.zip eSatici_eKassa.app
+
+    - name: Publish Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
       with:
-        name: eSatici_eKassa_macOS
-        path: dist/eSatici_eKassa.app
+        tag_name: "v1.0.${{ github.run_number }}"
+        name: "eSatici eKassa Agent v1.0.${{ github.run_number }}"
+        files: |
+          eSatici_eKassa_Windows.zip
+          eSatici_eKassa_macOS.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
