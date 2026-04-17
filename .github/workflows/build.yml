@@ -1,0 +1,47 @@
+name: Build Agent
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller --noconfirm --onedir --windowed --name "eSatici_eKassa" "eSatici_eKassa.py"
+
+    - name: Upload Artifact Windows
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: eSatici_eKassa_Windows
+        path: dist/eSatici_eKassa
+
+    - name: Upload Artifact macOS
+      if: runner.os == 'macOS'
+      uses: actions/upload-artifact@v4
+      with:
+        name: eSatici_eKassa_macOS
+        path: dist/eSatici_eKassa.app
