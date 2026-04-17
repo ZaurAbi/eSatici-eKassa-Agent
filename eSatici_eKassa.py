@@ -77,7 +77,7 @@ def generate_ekassam_headers(key: str) -> dict:
     return {"dt": dt_str, "nonce": nonce, "token": token}
 
 # Actions that use GET (info/status queries)
-_GET_ACTIONS = {"kas_info", "kas_shift", "kas_lastdoc", "kas_xreport"}
+_GET_ACTIONS = {"kas_info", "kas_shift", "kas_openshift", "kas_closeshift", "kas_lastdoc", "kas_xreport"}
 
 # ------------- WebSocket Client -------------
 
