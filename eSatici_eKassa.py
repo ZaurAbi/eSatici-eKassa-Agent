@@ -63,6 +63,22 @@ def get_ssl_context():
     ctx = ssl.create_default_context(cafile=certifi.where())
     return ctx
 
+# ------------- eKassam Auth Token Generation -------------
+import hashlib
+import secrets as _secrets
+from datetime import datetime as _dt
+
+def generate_ekassam_headers(key: str) -> dict:
+    """Generate SHA-256 auth headers for eKassam terminal API."""
+    dt_str = _dt.now().strftime("%Y%m%d%H%M%S")
+    nonce = _secrets.token_hex(4)
+    sha_dt = hashlib.sha256(dt_str.encode()).hexdigest()
+    token = hashlib.sha256(f"{sha_dt}:{nonce}:{key}".encode()).hexdigest()
+    return {"dt": dt_str, "nonce": nonce, "token": token}
+
+# Actions that use GET (info/status queries)
+_GET_ACTIONS = {"kas_info", "kas_shift", "kas_lastdoc", "kas_xreport"}
+
 # ------------- WebSocket Client -------------
 
 async def websocket_loop(gui_queue):
@@ -95,14 +111,24 @@ async def websocket_loop(gui_queue):
                         action = data.get("action")
                         ip = data.get("ip")
                         port = data.get("port")
+                        key = data.get("key", "")
                         payload = data.get("payload", {})
                         request_id = data.get("request_id")
                         
                         target_url = f"http://{ip}:{port}/api/{action}"
                         log.info(f"Forwarding: {action} → {target_url}")
+                        
+                        # Generate eKassam auth headers
+                        headers = generate_ekassam_headers(key) if key else {}
+                        
                         try:
-                            response = requests.post(target_url, json=payload, timeout=15)
+                            if action in _GET_ACTIONS:
+                                response = requests.get(target_url, headers=headers, timeout=15)
+                            else:
+                                headers["Content-Type"] = "application/json"
+                                response = requests.post(target_url, headers=headers, json=payload, timeout=25)
                             result = response.json()
+                            log.info(f"Terminal response code: {result.get('code', '?')}")
                         except Exception as e:
                             log.error(f"Local terminal error: {e}")
                             result = {"code": 500, "message": str(e), "data": None}
