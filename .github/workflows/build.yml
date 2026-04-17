@@ -32,7 +32,11 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --noconfirm --onedir --windowed --name "eSatici_eKassa" "eSatici_eKassa.py"
+        pyinstaller --noconfirm --onedir --windowed --name "eSatici_eKassa" \
+          --collect-data customtkinter \
+          --collect-data certifi \
+          --hidden-import certifi \
+          "eSatici_eKassa.py"
 
     - name: Zip Windows Artifact
       if: runner.os == 'Windows'
