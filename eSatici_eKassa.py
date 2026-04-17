@@ -6,6 +6,7 @@ import sys
 import os
 import requests
 import websockets
+import queue
 
 import customtkinter as ctk
 import pystray
@@ -131,9 +132,23 @@ class ESaticiApp(ctk.CTk):
         # System Tray icon
         self.tray_icon = None
         self.worker_thread = None
+        
+        # Thread-safe queue for UI updates
+        self.gui_queue = queue.Queue()
+        self.after(100, self.process_queue)
+
+    def process_queue(self):
+        try:
+            while True:
+                task = self.gui_queue.get_nowait()
+                task()
+        except queue.Empty:
+            pass
+        self.after(100, self.process_queue)
 
     def update_status(self, text, color):
-        self.after(0, lambda: self.lbl_status.configure(text=text, text_color=color))
+        # Push update to main thread queue
+        self.gui_queue.put(lambda t=text, c=color: self.lbl_status.configure(text=t, text_color=c))
 
     def toggle_connection(self):
         if state.should_run:
